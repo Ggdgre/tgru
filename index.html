@@ -12,18 +12,16 @@
         body.dark-mode { --bg-main: #182533; --bg-sidebar: #17212b; --bg-chat: #0e1621; --text-color: #f5f5f5; --text-muted: #7f91a4; --border-color: #101921; --chat-hover: #202b36; --chat-active: #2b394a; }
         body { --bg-main: #fff; --bg-sidebar: #fff; --bg-chat: #f4f4f5; --text-color: #000; --text-muted: #8e8e93; --border-color: #e6e6e6; --chat-hover: #f2f6fa; --chat-active: #e2eff9; }
 
-        /* ОКНО ЛОГИНА */
-        .login-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .login-box { width: 360px; text-align: center; padding: 20px; }
-        .login-logo { width: 100px; height: 100px; background: #2481cc; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 50px; font-weight: bold; }
-        .login-title { font-size: 26px; font-weight: 500; margin-bottom: 10px; color: #222; }
-        .login-subtitle { color: #777; font-size: 14px; margin-bottom: 30px; }
-        .input-group { position: relative; margin-bottom: 20px; }
-        .login-input { width: 100%; padding: 12px 15px; border: 1px solid #dadce0; border-radius: 8px; font-size: 16px; outline: none; transition: border 0.2s; }
-        .login-input:focus { border: 2px solid #2481cc; padding: 11px 14px; }
-        .login-btn { width: 100%; background: #2481cc; color: white; border: none; padding: 13px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.2s; }
-        .login-btn:hover { background: #1f71b2; }
-        .login-error { color: #e53935; font-size: 14px; margin-top: 15px; display: none; }
+        /* ОКНО АДМИН-АВТОРИЗАЦИИ (МОДАЛЬНОЕ) */
+        .admin-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; }
+        .admin-box { width: 340px; background: var(--bg-main); padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); color: var(--text-color); }
+        .admin-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; }
+        .admin-input { width: 100%; padding: 10px 12px; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-chat); color: var(--text-color); outline: none; }
+        .admin-btn-row { display: flex; gap: 10px; justify-content: center; }
+        .admin-btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .admin-submit { background: #2481cc; color: white; }
+        .admin-cancel { background: var(--border-color); color: var(--text-muted); }
+        .admin-error { color: #e53935; font-size: 13px; margin-top: 10px; display: none; }
 
         /* ОСНОВНОЙ КОНТЕЙНЕР */
         .tg-container { width: 100vw; height: 100vh; background: var(--bg-main); display: flex; overflow: hidden; }
@@ -36,11 +34,10 @@
         /* Поиск */
         .search-container { padding: 10px 12px; background: var(--bg-sidebar); border-bottom: 1px solid var(--border-color); }
         .search-bar { width: 100%; padding: 8px 12px; background: var(--bg-chat); border: 1px solid transparent; border-radius: 8px; font-size: 14px; color: var(--text-color); outline: none; }
-        .search-bar:focus { border-color: #2481cc; background: var(--bg-main); }
-
+        
         /* Список чатов */
         .chat-list { flex: 1; overflow-y: auto; }
-        .chat-item { display: flex; align-items: center; padding: 10px 12px; cursor: pointer; border-bottom: 1px solid var(--border-color); transition: background 0.2s; }
+        .chat-item { display: flex; align-items: center; padding: 10px 12px; cursor: pointer; border-bottom: 1px solid var(--border-color); }
         .chat-item:hover { background: var(--chat-hover); }
         .chat-item.active { background: var(--chat-active); }
         
@@ -69,7 +66,6 @@
 
         /* Поле ввода */
         .input-panel { padding: 10px 10%; background: var(--bg-main); display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--border-color); z-index: 10; }
-        .attach-btn, .emoji-btn { font-size: 22px; color: var(--text-muted); cursor: pointer; }
         .message-input { flex: 1; border: none; padding: 10px; font-size: 15px; outline: none; background: transparent; color: var(--text-color); }
         .send-btn { color: #2481cc; font-weight: bold; cursor: pointer; font-size: 16px; text-transform: uppercase; background: none; border: none; }
 
@@ -82,14 +78,17 @@
         
         .profile-section { text-align: center; position: relative; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
         .my-avatar-container { position: relative; width: 90px; height: 90px; margin: 0 auto 10px; }
-        .my-avatar { width: 100%; height: 100%; border-radius: 50%; background: #2481cc; color: white; font-size: 32px; font-weight: bold; display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; }
-        .file-overlay { position: absolute; bottom: 0; right: 0; background: #2481cc; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; cursor: pointer; border: 2px solid var(--bg-main); }
+        .my-avatar { width: 100%; height: 100%; border-radius: 50%; background: #999; color: white; font-size: 32px; font-weight: bold; display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; }
+        .file-overlay { position: absolute; bottom: 0; right: 0; background: #2481cc; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; cursor: pointer; border: 2px solid var(--bg-main); display: none; }
         
         .setting-item { display: flex; flex-direction: column; gap: 5px; }
         .setting-item label { font-size: 13px; color: #2481cc; font-weight: 500; }
         .setting-item input, .setting-item textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-chat); color: var(--text-color); outline: none; }
         .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
         
+        .btn-admin-login { width: 100%; background: #e53935; color: white; padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .admin-badge { background: #2481cc; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; display: none; margin-top: 5px; inline-size: max-content; margin-left: auto; margin-right: auto; }
+
         /* Заглушка пустого чата */
         .empty-chat { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-muted); background: var(--bg-chat); position: relative; }
         .empty-hint { background: rgba(0,0,0,0.4); color: white; padding: 6px 12px; border-radius: 12px; font-size: 14px; z-index: 10; }
@@ -97,22 +96,17 @@
 </head>
 <body>
 
-    <!-- СТРАНИЦА АВТОРИЗАЦИИ -->
-    <div class="login-overlay" id="loginPage">
-        <div class="login-box">
-            <div class="login-logo">✈</div>
-            <div class="login-title">Вход в Telegram</div>
-            <div class="login-subtitle">Введите учетные данные администратора</div>
-            
-            <div class="input-group">
-                <input type="text" id="username" class="login-input" placeholder="Логин">
+    <!-- МОДАЛЬНОЕ ОКНО ДЛЯ ВХОДА В АДМИНКУ (ИЗ НАСТРОЕК) -->
+    <div class="admin-modal" id="adminModal">
+        <div class="admin-box">
+            <div class="admin-title">Доступ Администратора</div>
+            <input type="text" id="adminUser" class="admin-input" placeholder="Логин админа">
+            <input type="password" id="adminPass" class="admin-input" placeholder="Пароль админа">
+            <div class="admin-btn-row">
+                <button class="admin-btn admin-submit" onclick="confirmAdminLogin()">Войти</button>
+                <button class="admin-btn admin-cancel" onclick="closeAdminModal()">Отмена</button>
             </div>
-            <div class="input-group">
-                <input type="password" id="password" class="login-input" placeholder="Пароль">
-            </div>
-            
-            <button class="login-btn" onclick="tryLogin()">Далее</button>
-            <div class="login-error" id="loginError">Неверный логин или пароль!</div>
+            <div class="admin-error" id="adminError">Неверный логин или пароль!</div>
         </div>
     </div>
 
@@ -142,22 +136,26 @@
                 <div class="settings-content">
                     <div class="profile-section">
                         <div class="my-avatar-container">
-                            <div class="my-avatar" id="myAvatar">Y</div>
-                            <label class="file-overlay" for="avatarUpload">📷</label>
+                            <div class="my-avatar" id="myAvatar">U</div>
+                            <label class="file-overlay" id="avatarLabel" for="avatarUpload">📷</label>
                             <input type="file" id="avatarUpload" style="display:none" accept="image/*" onchange="uploadAvatar(event)">
                         </div>
-                        <h3 id="profileNameDisplay" style="margin-bottom: 4px;">Yarik34051</h3>
-                        <p style="font-size: 13px; color: var(--text-muted);">@yarik34051_admin</p>
+                        <h3 id="profileNameDisplay" style="margin-bottom: 4px;">Пользователь</h3>
+                        <p id="profileTagDisplay" style="font-size: 13px; color: var(--text-muted);">@user_client</p>
+                        <div class="admin-badge" id="adminBadge">Администратор</div>
+                        
+                        <!-- Кнопка авторизации админа -->
+                        <button class="btn-admin-login" id="adminLoginBtn" onclick="openAdminModal()">Войти как Администратор</button>
                     </div>
 
                     <div class="setting-item">
                         <label>Ваше имя</label>
-                        <input type="text" id="settingName" value="Yarik34051" oninput="updateProfileName(this.value)">
+                        <input type="text" id="settingName" value="Пользователь" oninput="updateProfileName(this.value)" disabled>
                     </div>
 
                     <div class="setting-item">
                         <label>О себе</label>
-                        <textarea id="settingBio" placeholder="Напишите что-то о себе...">Администратор TelegramRu</textarea>
+                        <textarea id="settingBio" placeholder="Доступно только администраторам..." disabled>Обычный клиент TelegramRu</textarea>
                     </div>
 
                     <div class="toggle-row">
@@ -192,9 +190,7 @@
             <div class="messages-container" id="messagesBox" style="display: none;"></div>
 
             <div class="input-panel" id="inputPanel" style="display: none;">
-                <div class="emoji-btn">☺</div>
                 <input type="text" class="message-input" id="messageText" placeholder="Напишите сообщение..." onkeypress="handleKeyPress(event)">
-                <div class="attach-btn">📎</div>
                 <button class="send-btn" onclick="sendMessage()">Отправка</button>
             </div>
         </div>
@@ -202,24 +198,58 @@
     </div>
 
     <script>
-        // НАСТРОЕНО ПОД ВАШ URL [1]
-        const BIN_ID = "https://api.npoint.io/a8fcd8db01ea5efb569e"; 
-        const URL = `https://npoint.io{BIN_ID}`;
+        const BIN_ID = "a8fcd8db01ea5efb569e"; 
+        const URL = `https://api.npoint.io/a8fcd8db01ea5efb569e`;
 
         let chatsData = [];
         let activeChatId = null;
         let myAvatarUrl = ""; 
+        let isAdmin = false; // По умолчанию заходим как обычный пользователь
 
-        // Логин
-        async function tryLogin() {
-            const userInp = document.getElementById('username').value.trim();
-            const passInp = document.getElementById('password').value.trim();
-            const errMsg = document.getElementById('loginError');
+        // Автоматический вход обычного юзера при загрузке страницы
+        window.onload = function() {
+            loadDefaultUser();
+        };
+
+        function loadDefaultUser() {
+            // Базовые локальные демо-чаты для обычного юзера
+            chatsData = [
+                { id: 1, name: "Павел Дуров", color: "#2481cc", initial: "ПД", history: [{ text: "Привет! Вы вошли как обычный пользователь.", isOut: false, time: "12:00" }] },
+                { id: 2, name: "Поддержка", color: "#4caf50", initial: "ПД", history: [{ text: "Чтобы синхронизировать облако, войдите в админку через настройки.", isOut: false, time: "12:01" }] }
+            ];
+            initApp();
+        }
+
+        // Окна модалки админа
+        function openAdminModal() {
+            document.getElementById('adminModal').style.display = 'flex';
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').style.display = 'none';
+            document.getElementById('adminError').style.display = 'none';
+        }
+
+        // Проверка данных админа изнутри настроек
+        async function confirmAdminLogin() {
+            const userInp = document.getElementById('adminUser').value.trim();
+            const passInp = document.getElementById('adminPass').value.trim();
+            const errMsg = document.getElementById('adminError');
 
             if (userInp === "Yarik34051" && passInp === "RePaCk By XatabEdition") {
-                document.getElementById('loginPage').style.display = 'none';
-                document.getElementById('chatList').innerHTML = "<div style='padding:15px; color:gray;'>Синхронизация с npoint...</div>";
+                isAdmin = true;
+                closeAdminModal();
                 
+                // Переключаем интерфейс на админский режим
+                document.getElementById('adminLoginBtn').style.display = 'none';
+                document.getElementById('adminBadge').style.display = 'block';
+                document.getElementById('avatarLabel').style.display = 'flex';
+                document.getElementById('settingName').disabled = false;
+                document.getElementById('settingBio').disabled = false;
+                document.getElementById('profileTagDisplay').innerText = "@yarik34051_admin";
+
+                // Загружаем данные админа из npoint.io корзины
+                document.getElementById('chatList').innerHTML = "<div style='padding:15px; color:gray;'>Синхронизация админки...</div>";
                 await loadDataFromCloud();
                 initApp();
             } else {
@@ -227,8 +257,9 @@
             }
         }
 
-        // Загрузка
+        // Загрузка (работает только для админа)
         async function loadDataFromCloud() {
+            if (!isAdmin) return;
             try {
                 const response = await fetch(URL);
                 if (!response.ok) throw new Error("Ошибка");
@@ -251,15 +282,13 @@
                     }
                 }
             } catch (error) {
-                console.error("npoint пуст или недоступен, включен локальный режим:", error);
-                chatsData = [
-                    { id: 1, name: "Павел Дуров", color: "#2481cc", initial: "ПД", history: [{ text: "Привет! Сервер npoint подключен к вашему URL.", isOut: false, time: "12:00" }] }
-                ];
+                console.error("Ошибка npoint:", error);
             }
         }
 
-        // Сохранение
+        // Сохранение в облако (Доступно только если залогинен админ)
         async function saveDataToCloud() {
+            if (!isAdmin) return; // Обычные юзеры не могут перезаписать npoint
             const payload = {
                 profile: {
                     name: document.getElementById('settingName').value,
@@ -275,13 +304,13 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
                 });
-                console.log("Данные успешно сохранены на npoint.io");
+                console.log("Данные админа синхронизированы с npoint.io");
             } catch (error) {
-                console.error("Ошибка сохранения на npoint:", error);
+                console.error("Ошибка сохранения:", error);
             }
         }
 
-        // Логика UI
+        // Рендеринг интерфейса чатов
         function initApp() {
             const listContainer = document.getElementById('chatList');
             listContainer.innerHTML = "";
@@ -349,7 +378,7 @@
             renderMessages();
             initApp();
             
-            await saveDataToCloud();
+            if (isAdmin) await saveDataToCloud();
         }
 
         function handleKeyPress(e) {
@@ -362,7 +391,7 @@
                 panel.classList.add('active');
             } else {
                 panel.classList.remove('active');
-                saveDataToCloud(); 
+                if (isAdmin) saveDataToCloud(); 
             }
         }
 
@@ -375,6 +404,7 @@
         }
 
         function uploadAvatar(event) {
+            if (!isAdmin) return;
             const file = event.target.files;
             if (!file) return;
 
@@ -400,4 +430,3 @@
     </script>
 </body>
 </html>
-
