@@ -3,71 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TelegramRu — GitHub Онлайн</title>
+    <title>TelegramRu — Официальный Клиент</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: #e7ebf0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
-        .tg-container { width: 100%; max-width: 950px; height: 85vh; background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; overflow: hidden; }
-        .sidebar { width: 30%; border-right: 1px solid #e6e6e6; display: flex; flex-direction: column; background: #fff; }
-        .sidebar-header { padding: 15px; background: #2481cc; color: white; font-weight: bold; font-size: 18px; }
-        .section-title { padding: 10px 15px; background: #f4f4f5; color: #8e8e93; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .chat-item { display: flex; align-items: center; padding: 12px 15px; background: #f2f6fa; border-left: 4px solid #2481cc; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; background: #3498db; font-size: 18px; }
-        .main-content { width: 70%; display: flex; flex-direction: column; background: #f4f4f5; position: relative; }
-        .main-header { padding: 15px 20px; background: white; border-bottom: 1px solid #e6e6e6; display: flex; justify-content: space-between; align-items: center; }
-        .channel-name { font-weight: 600; font-size: 16px; }
-        .admin-login-btn { background: #2481cc; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        
+        /* Развертывание приложения на весь экран */
+        html, body { height: 100%; width: 100%; overflow: hidden; background-color: #e7ebf0; }
+        
+        .tg-container { width: 100vw; height: 100vh; background: #fff; display: flex; overflow: hidden; }
+        
+        /* Боковая панель */
+        .sidebar { width: 30%; max-width: 400px; min-width: 280px; border-right: 1px solid #e6e6e6; display: flex; flex-direction: column; background: #fff; }
+        .sidebar-header { padding: 18px 15px; background: #2481cc; color: white; font-weight: bold; font-size: 20px; letter-spacing: 0.5px; }
+        .section-title { padding: 10px 15px; background: #f4f4f5; color: #8e8e93; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold; }
+        
+        .chat-list { flex: 1; overflow-y: auto; }
+        .chat-item { display: flex; align-items: center; padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f4f4f5; transition: background 0.2s; }
+        .chat-item:hover { background: #f2f6fa; }
+        .chat-item.active { background: #e2eff9; border-left: 4px solid #2481cc; }
+        
+        /* Динамические аватарки */
+        .avatar { width: 45px; height: 45px; border-radius: 50%; margin-right: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .av-blue { background: #2481cc; }
+        .av-green { background: #2ecc71; }
+        .av-orange { background: #e67e22; }
+        .av-purple { background: #9b59b6; }
+        .av-red { background: #e74c3c; }
+
+        .chat-info { flex: 1; display: flex; flex-direction: column; }
+        .chat-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+        .chat-name { font-weight: 600; font-size: 14px; color: #000; }
+        .chat-preview { font-size: 13px; color: #8e8e93; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+
+        /* Основной экран чата */
+        .main-content { flex: 1; display: flex; flex-direction: column; background: #f4f4f5; position: relative; }
+        .main-header { padding: 12px 20px; background: white; border-bottom: 1px solid #e6e6e6; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .header-left { display: flex; flex-direction: column; }
+        .channel-name { font-weight: 600; font-size: 16px; margin-bottom: 2px; }
+        .channel-status { font-size: 12px; color: #2481cc; }
+        
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        .call-btn { background: #2ecc71; color: white; border: none; padding: 8px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: background 0.2s; }
+        .call-btn:hover { background: #27ae60; }
+        .admin-login-btn { background: #2481cc; color: white; border: none; padding: 8px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: bold; transition: background 0.2s; }
         .admin-login-btn:hover { background: #1c6fa3; }
-        .feed { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; background-image: url('https://githubusercontent.com'); }
-        .post-card { background: white; padding: 15px; border-radius: 8px; max-width: 85%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); align-self: flex-start; animation: fadeIn 0.2s ease; }
+
+        /* Лента постов */
+        .feed { flex: 1; overflow-y: auto; padding: 25px; display: flex; flex-direction: column; gap: 15px; background-image: url('https://githubusercontent.com'); background-repeat: repeat; }
+        .post-card { background: white; padding: 12px 16px; border-radius: 12px; max-width: 75%; box-shadow: 0 1px 2px rgba(0,0,0,0.07); align-self: flex-start; animation: fadeIn 0.2s ease; position: relative; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .post-author { font-weight: bold; color: #2481cc; font-size: 14px; margin-bottom: 5px; }
-        .post-text { font-size: 15px; color: #333; line-height: 1.4; word-break: break-word; }
-        .post-date { font-size: 11px; color: #999; text-align: right; margin-top: 5px; }
-        .publish-panel { padding: 15px; background: white; border-top: 1px solid #e6e6e6; display: none; gap: 10px; }
-        .publish-input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; outline: none; font-size: 15px; }
-        .publish-btn { background: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 10; }
-        .modal-content { background: white; padding: 25px; border-radius: 10px; width: 320px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .modal h3 { margin-bottom: 15px; }
-        .modal input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; outline: none; }
+        .post-author { font-weight: bold; color: #2481cc; font-size: 13px; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
+        .post-text { font-size: 15px; color: #333; line-height: 1.4; word-break: break-word; padding-right: 40px; }
+        .post-date { font-size: 11px; color: #999; position: absolute; bottom: 8px; right: 12px; }
+
+        /* Панель публикации */
+        .publish-panel { padding: 15px 20px; background: white; border-top: 1px solid #e6e6e6; display: none; gap: 12px; align-items: center; }
+        .publish-input { flex: 1; padding: 12px; border: 1px solid #dbdbdb; border-radius: 8px; outline: none; font-size: 15px; background: #f4f4f5; transition: border 0.2s; }
+        .publish-input:focus { border-color: #2481cc; background: #fff; }
+        .publish-btn { background: #2ecc71; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; }
+        
+        /* Модальные окна */
+        .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 10; backdrop-filter: blur(2px); }
+        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 340px; text-align: center; box-shadow: 0 5px 25px rgba(0,0,0,0.15); }
+        .modal h3 { margin-bottom: 15px; color: #333; }
+        .modal input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 8px; outline: none; font-size: 15px; }
         .modal-btns { display: flex; gap: 10px; }
-        .modal-btns button { flex: 1; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-cancel { background: #e74c3c; color: white; }
+        .modal-btns button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .btn-cancel { background: #f4f4f5; color: #333; }
         .btn-enter { background: #2481cc; color: white; }
+
+        /* Окно интерфейса звонка */
+        .call-screen { display: none; flex-direction: column; justify-content: space-between; align-items: center; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; height: 380px; background: #1a1a1a; color: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); z-index: 20; text-align: center; }
+        .call-avatar { width: 90px; height: 90px; border-radius: 50%; background: #2481cc; margin: 20px auto; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(36, 129, 204, 0.5); } 70% { box-shadow: 0 0 0 15px rgba(36, 129, 204, 0); } 100% { box-shadow: 0 0 0 0 rgba(36, 129, 204, 0); } }
+        .call-status-text { color: #8e8e93; font-size: 14px; margin-top: 5px; animation: flash 1.5s infinite; }
+        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .call-actions { display: flex; gap: 20px; width: 100%; justify-content: center; margin-top: 20px; }
+        .call-action-btn { width: 50px; height: 50px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; }
+        .btn-mute { background: #333; }
+        .btn-hangup { background: #e74c3c; }
     </style>
 </head>
 <body>
 
 <div class="tg-container">
+    <!-- Левая панель: Мессенджер -->
     <div class="sidebar">
         <div class="sidebar-header">TelegramRu</div>
-        <div class="section-title">Онлайн Каналы</div>
-        <div class="chat-item">
-            <div class="avatar">📢</div>
-            <div>
-                <div style="font-weight:600; font-size:14px;">Глобальный Канал</div>
-                <div style="font-size:12px; color:#8e8e93;">GitHub Pages Онлайн</div>
+        
+        <div class="chat-list">
+            <div class="section-title">Официальные ресурсы</div>
+            <div class="chat-item active">
+                <div class="avatar av-blue">📢</div>
+                <div class="chat-info">
+                    <div class="chat-meta><span class="chat-name">Глобальный Канал</span></div>
+                    <div class="chat-preview">Информационная лента</div>
+                </div>
+            </div>
+            <div class="chat-item" onclick="alert('Это закрытая группа обсуждения для участников.')">
+                <div class="avatar av-green">💬</div>
+                <div class="chat-info">
+                    <div class="chat-meta><span class="chat-name">Главный чат проекта</span></div>
+                    <div class="chat-preview">Обсуждение публикаций...</div>
+                </div>
+            </div>
+
+            <div class="section-title">Администрация и боты</div>
+            <div class="chat-item" onclick="alert('Связь с поддержкой проекта.')">
+                <div class="avatar av-orange">🛠️</div>
+                <div class="chat-info">
+                    <div class="chat-meta><span class="chat-name">Тех. Поддержка</span></div>
+                    <div class="chat-preview">Задать вопрос админу</div>
+                </div>
+            </div>
+            <div class="chat-item" onclick="alert('Бот автоматической модерации каналов.')">
+                <div class="avatar av-purple">🤖</div>
+                <div class="chat-info">
+                    <div class="chat-meta><span class="chat-name">TelegramRu Bot</span></div>
+                    <div class="chat-preview">Бот активен и работает</div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Правая панель: Рабочая область -->
     <div class="main-content">
         <div class="main-header">
-            <div class="channel-name">📢 Глобальный Канал</div>
-            <button class="admin-login-btn" id="loginBtn" onclick="toggleModal(true)">Вход для админа</button>
+            <div class="header-left">
+                <div class="channel-name">📢 Глобальный Канал</div>
+                <div class="channel-status" id="onlineStatus">в сети</div>
+            </div>
+            <div class="header-actions">
+                <button class="call-btn" onclick="startCall()">📞 Звонок</button>
+                <button class="admin-login-btn" id="loginBtn" onclick="toggleModal(true)">Вход для админа</button>
+            </div>
         </div>
 
+        <!-- Потоковая лента сообщений -->
         <div class="feed" id="postFeed"></div>
 
+        <!-- Панель ввода сообщений администратора -->
         <div class="publish-panel" id="publishPanel">
-            <input type="text" id="postText" class="publish-input" placeholder="Напишите официальный пост...">
+            <input type="text" id="postText" class="publish-input" placeholder="Напишите официальный пост от лица канала...">
             <button class="publish-btn" onclick="sendPost()">Опубликовать</button>
         </div>
 
+        <!-- Окно логина админа -->
         <div class="modal" id="loginModal">
             <div class="modal-content">
-                <h3>Вход администратора</h3>
+                <h3>Авторизация</h3>
                 <input type="text" id="adminLogin" placeholder="Логин (admin)">
                 <input type="password" id="adminPassword" placeholder="Специальный пароль">
                 <div class="modal-btns">
@@ -76,13 +160,26 @@
                 </div>
             </div>
         </div>
+
+        <!-- Интерфейс аудиозвонка -->
+        <div class="call-screen" id="callScreen">
+            <div>
+                <h3 style="font-size: 20px;">Глобальный Канал</h3>
+                <div class="call-status-text" id="callStatusText">Вызов...</div>
+            </div>
+            <div class="call-avatar">📢</div>
+            <div class="call-actions">
+                <button class="call-action-btn btn-mute" onclick="alert('Микрофон отключен')">🎤</button>
+                <button class="call-action-btn btn-hangup" onclick="endCall()">❌</button>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    // НАСТРОЙКА СЕТИ (Вставьте свой ID из npoint.io ниже)
+    // НАСТРОЙКА ВАШЕЙ СЕТИ NPOINT
     const BIN_ID = "a8fcd8db01ea5efb569e"; 
-    const URL = `https://api.npoint.io/a8fcd8db01ea5efb569e`;
+    const URL = `https://npoint.io{BIN_ID}`;
 
     // Настройки доступа администратора
     const ADMIN_LOGIN = "admin";
@@ -91,6 +188,47 @@
 
     let currentAdmin = null;
     let totalPostsLoaded = 0;
+    let audioCtx = null;
+    let dialInterval = null;
+
+    // Генератор системного звука звонка (Гудок без внешних файлов аудио)
+    function playDialTone() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(425, audioCtx.currentTime); // Стандартная частота гудка
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        osc.start();
+        
+        // Гудок длится 1 секунду
+        setTimeout(() => {
+            osc.stop();
+        }, 1000);
+    }
+
+    function startCall() {
+        document.getElementById('callScreen').style.display = 'flex';
+        document.getElementById('callStatusText').innerText = "Вызов...";
+        playDialTone();
+        // Повторяем гудки каждые 3 секунды
+        dialInterval = setInterval(playDialTone, 3000);
+        
+        // Через 7 секунд имитируем ответ
+        setTimeout(() => {
+            clearInterval(dialInterval);
+            document.getElementById('callStatusText').innerText = "00:01 • Соединение установлено";
+            document.getElementById('callStatusText').style.color = "#2ecc71";
+        }, 7000);
+    }
+
+    function endCall() {
+        clearInterval(dialInterval);
+        document.getElementById('callScreen').style.display = 'none';
+        document.getElementById('callStatusText').style.color = "#8e8e93";
+    }
 
     // Скачивание постов с онлайн-сервера npoint
     async function loadPosts() {
@@ -109,7 +247,7 @@
                 const card = document.createElement('div');
                 card.className = 'post-card';
                 card.innerHTML = `
-                    <div class="post-author">✍️ ${post.author}</div>
+                    <div class="post-author"><span class="avatar av-blue" style="width:22px; height:22px; font-size:10px; margin-right:5px; display:inline-flex;">А</span> ✍️ ${post.author}</div>
                     <div class="post-text">${post.text}</div>
                     <div class="post-date">${post.time}</div>
                 `;
@@ -141,7 +279,7 @@
         }
     }
 
-    // Публикация в глобальную сеть
+    // Рабочая публикация в глобальную сеть npoint.io
     async function sendPost() {
         const textInput = document.getElementById('postText');
         const text = textInput.value.trim();
@@ -170,16 +308,15 @@
             textInput.value = '';
             loadPosts();
         } else {
-            alert('Ошибка при публикации. Проверьте ваш BIN_ID.');
+            alert('Ошибка при публикации. База данных npoint отклонила запрос.');
         }
     }
 
-    // Мгновенный старт при загрузке страницы
+    // Первоначальный запуск
     loadPosts();
-    // Проверка новых обновлений раз в 3 секунды
+    // Проверка новых постов в фоне каждые 3 секунды
     setInterval(loadPosts, 3000);
 </script>
 
 </body>
 </html>
-
