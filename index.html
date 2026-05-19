@@ -6,317 +6,398 @@
     <title>TelegramRu — Официальный Клиент</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        
-        /* Развертывание приложения на весь экран */
         html, body { height: 100%; width: 100%; overflow: hidden; background-color: #e7ebf0; }
+
+        /* ТЕМНАЯ ТЕМА */
+        body.dark-mode { --bg-main: #182533; --bg-sidebar: #17212b; --bg-chat: #0e1621; --text-color: #f5f5f5; --text-muted: #7f91a4; --border-color: #101921; --chat-hover: #202b36; --chat-active: #2b394a; }
+        body { --bg-main: #fff; --bg-sidebar: #fff; --bg-chat: #f4f4f5; --text-color: #000; --text-muted: #8e8e93; --border-color: #e6e6e6; --chat-hover: #f2f6fa; --chat-active: #e2eff9; }
+
+        /* ОКНО ЛОГИНА */
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .login-box { width: 360px; text-align: center; padding: 20px; }
+        .login-logo { width: 100px; height: 100px; background: #2481cc; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 50px; font-weight: bold; }
+        .login-title { font-size: 26px; font-weight: 500; margin-bottom: 10px; color: #222; }
+        .login-subtitle { color: #777; font-size: 14px; margin-bottom: 30px; }
+        .input-group { position: relative; margin-bottom: 20px; }
+        .login-input { width: 100%; padding: 12px 15px; border: 1px solid #dadce0; border-radius: 8px; font-size: 16px; outline: none; transition: border 0.2s; }
+        .login-input:focus { border: 2px solid #2481cc; padding: 11px 14px; }
+        .login-btn { width: 100%; background: #2481cc; color: white; border: none; padding: 13px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.2s; }
+        .login-btn:hover { background: #1f71b2; }
+        .login-error { color: #e53935; font-size: 14px; margin-top: 15px; display: none; }
+
+        /* ОСНОВНОЙ КОНТЕЙНЕР */
+        .tg-container { width: 100vw; height: 100vh; background: var(--bg-main); display: flex; overflow: hidden; }
         
-        .tg-container { width: 100vw; height: 100vh; background: #fff; display: flex; overflow: hidden; }
+        /* БОКОВАЯ ПАНЕЛЬ */
+        .sidebar { width: 30%; max-width: 400px; min-width: 300px; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; background: var(--bg-sidebar); position: relative; }
+        .sidebar-header { padding: 14px 15px; background: #2481cc; color: white; font-weight: bold; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
+        .menu-btn { cursor: pointer; font-size: 20px; padding: 5px; }
         
-        /* Боковая панель */
-        .sidebar { width: 30%; max-width: 400px; min-width: 280px; border-right: 1px solid #e6e6e6; display: flex; flex-direction: column; background: #fff; }
-        .sidebar-header { padding: 18px 15px; background: #2481cc; color: white; font-weight: bold; font-size: 20px; letter-spacing: 0.5px; }
-        .section-title { padding: 10px 15px; background: #f4f4f5; color: #8e8e93; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold; }
-        
+        /* Поиск */
+        .search-container { padding: 10px 12px; background: var(--bg-sidebar); border-bottom: 1px solid var(--border-color); }
+        .search-bar { width: 100%; padding: 8px 12px; background: var(--bg-chat); border: 1px solid transparent; border-radius: 8px; font-size: 14px; color: var(--text-color); outline: none; }
+        .search-bar:focus { border-color: #2481cc; background: var(--bg-main); }
+
+        /* Список чатов */
         .chat-list { flex: 1; overflow-y: auto; }
-        .chat-item { display: flex; align-items: center; padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f4f4f5; transition: background 0.2s; }
-        .chat-item:hover { background: #f2f6fa; }
-        .chat-item.active { background: #e2eff9; border-left: 4px solid #2481cc; }
+        .chat-item { display: flex; align-items: center; padding: 10px 12px; cursor: pointer; border-bottom: 1px solid var(--border-color); transition: background 0.2s; }
+        .chat-item:hover { background: var(--chat-hover); }
+        .chat-item.active { background: var(--chat-active); }
         
-        /* Динамические аватарки */
-        .avatar { width: 45px; height: 45px; border-radius: 50%; margin-right: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .av-blue { background: #2481cc; }
-        .av-green { background: #2ecc71; }
-        .av-orange { background: #e67e22; }
-        .av-purple { background: #9b59b6; }
-        .av-red { background: #e74c3c; }
+        .avatar { width: 48px; height: 48px; border-radius: 50%; margin-right: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px; background-size: cover; background-position: center; flex-shrink: 0; }
+        .chat-info { flex: 1; min-width: 0; }
+        .chat-name-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .chat-name { font-weight: 500; font-size: 15px; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chat-time { font-size: 12px; color: var(--text-muted); }
+        .chat-last-msg { font-size: 14px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .chat-info { flex: 1; display: flex; flex-direction: column; }
-        .chat-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
-        .chat-name { font-weight: 600; font-size: 14px; color: #000; }
-        .chat-preview { font-size: 13px; color: #8e8e93; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
-
-        /* Основной экран чата */
-        .main-content { flex: 1; display: flex; flex-direction: column; background: #f4f4f5; position: relative; }
-        .main-header { padding: 12px 20px; background: white; border-bottom: 1px solid #e6e6e6; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-        .header-left { display: flex; flex-direction: column; }
-        .channel-name { font-weight: 600; font-size: 16px; margin-bottom: 2px; }
-        .channel-status { font-size: 12px; color: #2481cc; }
+        /* ОКНО ЧАТА */
+        .chat-window { flex: 1; display: flex; flex-direction: column; background: var(--bg-chat); position: relative; }
+        .chat-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.06; background-image: url('https://githubusercontent.com'); pointer-events: none; }
         
-        .header-actions { display: flex; gap: 10px; align-items: center; }
-        .call-btn { background: #2ecc71; color: white; border: none; padding: 8px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: background 0.2s; }
-        .call-btn:hover { background: #27ae60; }
-        .admin-login-btn { background: #2481cc; color: white; border: none; padding: 8px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: bold; transition: background 0.2s; }
-        .admin-login-btn:hover { background: #1c6fa3; }
+        .chat-header { height: 56px; background: var(--bg-main); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 20px; z-index: 10; }
+        .chat-header-info { display: flex; flex-direction: column; }
+        .chat-header-name { font-weight: 500; font-size: 16px; color: var(--text-color); }
+        .chat-header-status { font-size: 13px; color: #2481cc; }
 
-        /* Лента постов */
-        .feed { flex: 1; overflow-y: auto; padding: 25px; display: flex; flex-direction: column; gap: 15px; background-image: url('https://githubusercontent.com'); background-repeat: repeat; }
-        .post-card { background: white; padding: 12px 16px; border-radius: 12px; max-width: 75%; box-shadow: 0 1px 2px rgba(0,0,0,0.07); align-self: flex-start; animation: fadeIn 0.2s ease; position: relative; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .post-author { font-weight: bold; color: #2481cc; font-size: 13px; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
-        .post-text { font-size: 15px; color: #333; line-height: 1.4; word-break: break-word; padding-right: 40px; }
-        .post-date { font-size: 11px; color: #999; position: absolute; bottom: 8px; right: 12px; }
+        /* Сообщения */
+        .messages-container { flex: 1; overflow-y: auto; padding: 20px 10%; z-index: 10; display: flex; flex-direction: column; gap: 8px; }
+        .msg-bubble { max-width: 60%; padding: 8px 14px; border-radius: 12px; font-size: 15px; position: relative; line-height: 1.4; word-wrap: break-word; }
+        .msg-in { background: var(--bg-main); color: var(--text-color); align-self: flex-start; border-bottom-left-radius: 4px; }
+        .msg-out { background: #eff6fe; color: #000; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .msg-time { font-size: 11px; color: #7f91a4; float: right; margin: 5px 0 -3px 8px; }
 
-        /* Панель публикации */
-        .publish-panel { padding: 15px 20px; background: white; border-top: 1px solid #e6e6e6; display: none; gap: 12px; align-items: center; }
-        .publish-input { flex: 1; padding: 12px; border: 1px solid #dbdbdb; border-radius: 8px; outline: none; font-size: 15px; background: #f4f4f5; transition: border 0.2s; }
-        .publish-input:focus { border-color: #2481cc; background: #fff; }
-        .publish-btn { background: #2ecc71; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; }
+        /* Поле ввода */
+        .input-panel { padding: 10px 10%; background: var(--bg-main); display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--border-color); z-index: 10; }
+        .attach-btn, .emoji-btn { font-size: 22px; color: var(--text-muted); cursor: pointer; }
+        .message-input { flex: 1; border: none; padding: 10px; font-size: 15px; outline: none; background: transparent; color: var(--text-color); }
+        .send-btn { color: #2481cc; font-weight: bold; cursor: pointer; font-size: 16px; text-transform: uppercase; background: none; border: none; }
+
+        /* ПАНЕЛЬ НАСТРОЕК */
+        .settings-panel { position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: var(--bg-main); z-index: 20; transition: left 0.3s ease; display: flex; flex-direction: column; }
+        .settings-panel.active { left: 0; }
+        .settings-header { background: #2481cc; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; font-size: 18px; font-weight: bold; }
+        .back-btn { cursor: pointer; font-size: 20px; }
+        .settings-content { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 20px; color: var(--text-color); }
         
-        /* Модальные окна */
-        .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 10; backdrop-filter: blur(2px); }
-        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 340px; text-align: center; box-shadow: 0 5px 25px rgba(0,0,0,0.15); }
-        .modal h3 { margin-bottom: 15px; color: #333; }
-        .modal input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 8px; outline: none; font-size: 15px; }
-        .modal-btns { display: flex; gap: 10px; }
-        .modal-btns button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; }
-        .btn-cancel { background: #f4f4f5; color: #333; }
-        .btn-enter { background: #2481cc; color: white; }
-
-        /* Окно интерфейса звонка */
-        .call-screen { display: none; flex-direction: column; justify-content: space-between; align-items: center; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; height: 380px; background: #1a1a1a; color: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); z-index: 20; text-align: center; }
-        .call-avatar { width: 90px; height: 90px; border-radius: 50%; background: #2481cc; margin: 20px auto; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(36, 129, 204, 0.5); } 70% { box-shadow: 0 0 0 15px rgba(36, 129, 204, 0); } 100% { box-shadow: 0 0 0 0 rgba(36, 129, 204, 0); } }
-        .call-status-text { color: #8e8e93; font-size: 14px; margin-top: 5px; animation: flash 1.5s infinite; }
-        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .call-actions { display: flex; gap: 20px; width: 100%; justify-content: center; margin-top: 20px; }
-        .call-action-btn { width: 50px; height: 50px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; }
-        .btn-mute { background: #333; }
-        .btn-hangup { background: #e74c3c; }
+        .profile-section { text-align: center; position: relative; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+        .my-avatar-container { position: relative; width: 90px; height: 90px; margin: 0 auto 10px; }
+        .my-avatar { width: 100%; height: 100%; border-radius: 50%; background: #2481cc; color: white; font-size: 32px; font-weight: bold; display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; }
+        .file-overlay { position: absolute; bottom: 0; right: 0; background: #2481cc; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; cursor: pointer; border: 2px solid var(--bg-main); }
+        
+        .setting-item { display: flex; flex-direction: column; gap: 5px; }
+        .setting-item label { font-size: 13px; color: #2481cc; font-weight: 500; }
+        .setting-item input, .setting-item textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-chat); color: var(--text-color); outline: none; }
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
+        
+        /* Заглушка пустого чата */
+        .empty-chat { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-muted); background: var(--bg-chat); position: relative; }
+        .empty-hint { background: rgba(0,0,0,0.4); color: white; padding: 6px 12px; border-radius: 12px; font-size: 14px; z-index: 10; }
     </style>
 </head>
 <body>
 
-<div class="tg-container">
-    <!-- Левая панель: Мессенджер -->
-    <div class="sidebar">
-        <div class="sidebar-header">TelegramRu</div>
-        
-        <div class="chat-list">
-            <div class="section-title">Официальные ресурсы</div>
-            <div class="chat-item active">
-                <div class="avatar av-blue">📢</div>
-                <div class="chat-info">
-                    <div class="chat-meta><span class="chat-name">Глобальный Канал</span></div>
-                    <div class="chat-preview">Информационная лента</div>
-                </div>
+    <!-- СТРАНИЦА АВТОРИЗАЦИИ -->
+    <div class="login-overlay" id="loginPage">
+        <div class="login-box">
+            <div class="login-logo">✈</div>
+            <div class="login-title">Вход в Telegram</div>
+            <div class="login-subtitle">Введите учетные данные администратора</div>
+            
+            <div class="input-group">
+                <input type="text" id="username" class="login-input" placeholder="Логин">
             </div>
-            <div class="chat-item" onclick="alert('Это закрытая группа обсуждения для участников.')">
-                <div class="avatar av-green">💬</div>
-                <div class="chat-info">
-                    <div class="chat-meta><span class="chat-name">Главный чат проекта</span></div>
-                    <div class="chat-preview">Обсуждение публикаций...</div>
-                </div>
+            <div class="input-group">
+                <input type="password" id="password" class="login-input" placeholder="Пароль">
             </div>
-
-            <div class="section-title">Администрация и боты</div>
-            <div class="chat-item" onclick="alert('Связь с поддержкой проекта.')">
-                <div class="avatar av-orange">🛠️</div>
-                <div class="chat-info">
-                    <div class="chat-meta><span class="chat-name">Тех. Поддержка</span></div>
-                    <div class="chat-preview">Задать вопрос админу</div>
-                </div>
-            </div>
-            <div class="chat-item" onclick="alert('Бот автоматической модерации каналов.')">
-                <div class="avatar av-purple">🤖</div>
-                <div class="chat-info">
-                    <div class="chat-meta><span class="chat-name">TelegramRu Bot</span></div>
-                    <div class="chat-preview">Бот активен и работает</div>
-                </div>
-            </div>
+            
+            <button class="login-btn" onclick="tryLogin()">Далее</button>
+            <div class="login-error" id="loginError">Неверный логин или пароль!</div>
         </div>
     </div>
 
-    <!-- Правая панель: Рабочая область -->
-    <div class="main-content">
-        <div class="main-header">
-            <div class="header-left">
-                <div class="channel-name">📢 Глобальный Канал</div>
-                <div class="channel-status" id="onlineStatus">в сети</div>
+    <!-- ОСНОВНОЙ ИНТЕРФЕЙС ПРИЛОЖЕНИЯ -->
+    <div class="tg-container">
+        
+        <!-- Левая колонка -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <span class="menu-btn" onclick="toggleSettings(true)">☰</span>
+                <span>Telegram</span>
+                <span style="font-size: 14px; opacity: 0.8;">Ru</span>
             </div>
-            <div class="header-actions">
-                <button class="call-btn" onclick="startCall()">📞 Звонок</button>
-                <button class="admin-login-btn" id="loginBtn" onclick="toggleModal(true)">Вход для админа</button>
+            
+            <div class="search-container">
+                <input type="text" class="search-bar" placeholder="Поиск">
             </div>
-        </div>
+            
+            <div class="chat-list" id="chatList"></div>
 
-        <!-- Потоковая лента сообщений -->
-        <div class="feed" id="postFeed"></div>
+            <!-- ОКНО НАСТРОЕК -->
+            <div class="settings-panel" id="settingsPanel">
+                <div class="settings-header">
+                    <span class="back-btn" onclick="toggleSettings(false)">←</span>
+                    <span>Настройки</span>
+                </div>
+                <div class="settings-content">
+                    <div class="profile-section">
+                        <div class="my-avatar-container">
+                            <div class="my-avatar" id="myAvatar">Y</div>
+                            <label class="file-overlay" for="avatarUpload">📷</label>
+                            <input type="file" id="avatarUpload" style="display:none" accept="image/*" onchange="uploadAvatar(event)">
+                        </div>
+                        <h3 id="profileNameDisplay" style="margin-bottom: 4px;">Yarik34051</h3>
+                        <p style="font-size: 13px; color: var(--text-muted);">@yarik34051_admin</p>
+                    </div>
 
-        <!-- Панель ввода сообщений администратора -->
-        <div class="publish-panel" id="publishPanel">
-            <input type="text" id="postText" class="publish-input" placeholder="Напишите официальный пост от лица канала...">
-            <button class="publish-btn" onclick="sendPost()">Опубликовать</button>
-        </div>
+                    <div class="setting-item">
+                        <label>Ваше имя</label>
+                        <input type="text" id="settingName" value="Yarik34051" oninput="updateProfileName(this.value)">
+                    </div>
 
-        <!-- Окно логина админа -->
-        <div class="modal" id="loginModal">
-            <div class="modal-content">
-                <h3>Авторизация</h3>
-                <input type="text" id="adminLogin" placeholder="Логин (admin)">
-                <input type="password" id="adminPassword" placeholder="Специальный пароль">
-                <div class="modal-btns">
-                    <button class="btn-cancel" onclick="toggleModal(false)">Отмена</button>
-                    <button class="btn-enter" onclick="loginAdmin()">Войти</button>
+                    <div class="setting-item">
+                        <label>О себе</label>
+                        <textarea id="settingBio" placeholder="Напишите что-то о себе...">Администратор TelegramRu</textarea>
+                    </div>
+
+                    <div class="toggle-row">
+                        <span>Ночной режим</span>
+                        <input type="checkbox" id="darkThemeToggle" onchange="toggleTheme(this.checked)" style="width: 20px; height: 20px; cursor: pointer;">
+                    </div>
+
+                    <div class="setting-item">
+                        <label>Цвет фона чата</label>
+                        <input type="color" value="#f4f4f5" onchange="changeChatBg(this.value)">
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Интерфейс аудиозвонка -->
-        <div class="call-screen" id="callScreen">
-            <div>
-                <h3 style="font-size: 20px;">Глобальный Канал</h3>
-                <div class="call-status-text" id="callStatusText">Вызов...</div>
+        <!-- Правая колонка -->
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-bg"></div>
+            
+            <div class="empty-chat" id="emptyChatHint">
+                <div class="chat-bg"></div>
+                <div class="empty-hint">Выберите чат, чтобы начать общение</div>
             </div>
-            <div class="call-avatar">📢</div>
-            <div class="call-actions">
-                <button class="call-action-btn btn-mute" onclick="alert('Микрофон отключен')">🎤</button>
-                <button class="call-action-btn btn-hangup" onclick="endCall()">❌</button>
+
+            <div class="chat-header" id="chatHeader" style="display: none;">
+                <div class="chat-header-info">
+                    <span class="chat-header-name" id="currentChatName">Чат</span>
+                    <span class="chat-header-status">в сети</span>
+                </div>
+            </div>
+
+            <div class="messages-container" id="messagesBox" style="display: none;"></div>
+
+            <div class="input-panel" id="inputPanel" style="display: none;">
+                <div class="emoji-btn">☺</div>
+                <input type="text" class="message-input" id="messageText" placeholder="Напишите сообщение..." onkeypress="handleKeyPress(event)">
+                <div class="attach-btn">📎</div>
+                <button class="send-btn" onclick="sendMessage()">Отправка</button>
             </div>
         </div>
+
     </div>
-</div>
 
-<script>
-    // НАСТРОЙКА ВАШЕЙ СЕТИ NPOINT
-    const BIN_ID = "a8fcd8db01ea5efb569e"; 
-    const URL = `https://api.npoint.io/a8fcd8db01ea5efb569e`;
+    <script>
+        // НАСТРОЕНО ПОД ВАШ URL [1]
+        const BIN_ID = "https://api.npoint.io/a8fcd8db01ea5efb569e"; 
+        const URL = `https://npoint.io{BIN_ID}`;
 
-    // Настройки доступа администратора
-    const ADMIN_LOGIN = "admin";
-    const ADMIN_PASSWORD = "123"; 
-    const ADMIN_NAME = "Официальный Админ";
+        let chatsData = [];
+        let activeChatId = null;
+        let myAvatarUrl = ""; 
 
-    let currentAdmin = null;
-    let totalPostsLoaded = 0;
-    let audioCtx = null;
-    let dialInterval = null;
+        // Логин
+        async function tryLogin() {
+            const userInp = document.getElementById('username').value.trim();
+            const passInp = document.getElementById('password').value.trim();
+            const errMsg = document.getElementById('loginError');
 
-    // Генератор системного звука звонка (Гудок без внешних файлов аудио)
-    function playDialTone() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let osc = audioCtx.createOscillator();
-        let gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(425, audioCtx.currentTime); // Стандартная частота гудка
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        osc.start();
-        
-        // Гудок длится 1 секунду
-        setTimeout(() => {
-            osc.stop();
-        }, 1000);
-    }
+            if (userInp === "Yarik34051" && passInp === "RePaCk By XatabEdition") {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('chatList').innerHTML = "<div style='padding:15px; color:gray;'>Синхронизация с npoint...</div>";
+                
+                await loadDataFromCloud();
+                initApp();
+            } else {
+                errMsg.style.display = 'block';
+            }
+        }
 
-    function startCall() {
-        document.getElementById('callScreen').style.display = 'flex';
-        document.getElementById('callStatusText').innerText = "Вызов...";
-        playDialTone();
-        // Повторяем гудки каждые 3 секунды
-        dialInterval = setInterval(playDialTone, 3000);
-        
-        // Через 7 секунд имитируем ответ
-        setTimeout(() => {
-            clearInterval(dialInterval);
-            document.getElementById('callStatusText').innerText = "00:01 • Соединение установлено";
-            document.getElementById('callStatusText').style.color = "#2ecc71";
-        }, 7000);
-    }
+        // Загрузка
+        async function loadDataFromCloud() {
+            try {
+                const response = await fetch(URL);
+                if (!response.ok) throw new Error("Ошибка");
+                const data = await response.json();
+                
+                chatsData = data.chats || [];
+                
+                if (data.profile) {
+                    document.getElementById('settingName').value = data.profile.name || "Yarik34051";
+                    document.getElementById('settingBio').value = data.profile.bio || "";
+                    document.getElementById('profileNameDisplay').innerText = data.profile.name || "Yarik34051";
+                    
+                    if (data.profile.avatar) {
+                        myAvatarUrl = data.profile.avatar;
+                        const av = document.getElementById('myAvatar');
+                        av.style.backgroundImage = `url('${myAvatarUrl}')`;
+                        av.innerText = "";
+                    } else {
+                        document.getElementById('myAvatar').innerText = (data.profile.name || "Y").charAt(0).toUpperCase();
+                    }
+                }
+            } catch (error) {
+                console.error("npoint пуст или недоступен, включен локальный режим:", error);
+                chatsData = [
+                    { id: 1, name: "Павел Дуров", color: "#2481cc", initial: "ПД", history: [{ text: "Привет! Сервер npoint подключен к вашему URL.", isOut: false, time: "12:00" }] }
+                ];
+            }
+        }
 
-    function endCall() {
-        clearInterval(dialInterval);
-        document.getElementById('callScreen').style.display = 'none';
-        document.getElementById('callStatusText').style.color = "#8e8e93";
-    }
+        // Сохранение
+        async function saveDataToCloud() {
+            const payload = {
+                profile: {
+                    name: document.getElementById('settingName').value,
+                    bio: document.getElementById('settingBio').value,
+                    avatar: myAvatarUrl
+                },
+                chats: chatsData
+            };
 
-    // Скачивание постов с онлайн-сервера npoint
-    async function loadPosts() {
-        try {
-            const response = await fetch(URL);
-            if (!response.ok) return;
-            const posts = await response.json();
+            try {
+                await fetch(URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                console.log("Данные успешно сохранены на npoint.io");
+            } catch (error) {
+                console.error("Ошибка сохранения на npoint:", error);
+            }
+        }
 
-            if (posts.length === totalPostsLoaded) return;
-            totalPostsLoaded = posts.length;
+        // Логика UI
+        function initApp() {
+            const listContainer = document.getElementById('chatList');
+            listContainer.innerHTML = "";
 
-            const feed = document.getElementById('postFeed');
-            feed.innerHTML = '';
-
-            posts.forEach(post => {
-                const card = document.createElement('div');
-                card.className = 'post-card';
-                card.innerHTML = `
-                    <div class="post-author"><span class="avatar av-blue" style="width:22px; height:22px; font-size:10px; margin-right:5px; display:inline-flex;">А</span> ✍️ ${post.author}</div>
-                    <div class="post-text">${post.text}</div>
-                    <div class="post-date">${post.time}</div>
+            chatsData.forEach(chat => {
+                const lastMsg = chat.history.length > 0 ? chat.history[chat.history.length - 1].text : "Нет сообщений";
+                const lastTime = chat.history.length > 0 ? chat.history[chat.history.length - 1].time : "";
+                
+                const item = document.createElement('div');
+                item.className = `chat-item ${activeChatId === chat.id ? 'active' : ''}`;
+                item.onclick = () => openChat(chat.id);
+                item.innerHTML = `
+                    <div class="avatar" style="background-color: ${chat.color}">${chat.initial}</div>
+                    <div class="chat-info">
+                        <div class="chat-name-row">
+                            <span class="chat-name">${chat.name}</span>
+                            <span class="chat-time">${lastTime}</span>
+                        </div>
+                        <div class="chat-last-msg">${lastMsg}</div>
+                    </div>
                 `;
-                feed.appendChild(card);
+                listContainer.appendChild(item);
             });
-            feed.scrollTop = feed.scrollHeight;
-        } catch (e) {
-            console.error("Сбой сети...");
         }
-    }
 
-    function toggleModal(show) {
-        document.getElementById('loginModal').style.display = show ? 'flex' : 'none';
-    }
-
-    function loginAdmin() {
-        const log = document.getElementById('adminLogin').value;
-        const pass = document.getElementById('adminPassword').value;
-
-        if (log === ADMIN_LOGIN && pass === ADMIN_PASSWORD) {
-            currentAdmin = ADMIN_NAME;
-            document.getElementById('publishPanel').style.display = 'flex';
-            document.getElementById('loginBtn').innerText = `Админ в сети`;
-            document.getElementById('loginBtn').style.background = '#2ecc71';
-            document.getElementById('loginBtn').disabled = true;
-            toggleModal(false);
-        } else {
-            alert('Неверный специальный пароль!');
+        function openChat(id) {
+            activeChatId = id;
+            document.getElementById('emptyChatHint').style.display = 'none';
+            document.getElementById('chatHeader').style.display = 'flex';
+            document.getElementById('messagesBox').style.display = 'flex';
+            document.getElementById('inputPanel').style.display = 'flex';
+            
+            const chat = chatsData.find(c => c.id === id);
+            document.getElementById('currentChatName').innerText = chat.name;
+            
+            renderMessages();
+            initApp(); 
         }
-    }
 
-    // Рабочая публикация в глобальную сеть npoint.io
-    async function sendPost() {
-        const textInput = document.getElementById('postText');
-        const text = textInput.value.trim();
-        if (!text || !currentAdmin) return;
+        function renderMessages() {
+            const box = document.getElementById('messagesBox');
+            box.innerHTML = "";
+            const chat = chatsData.find(c => c.id === activeChatId);
 
-        const timeString = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
-        // 1. Получаем текущие посты
-        let currentPosts = [];
-        try {
-            const res = await fetch(URL);
-            if (res.ok) currentPosts = await res.json();
-        } catch(e){}
-
-        // 2. Добавляем новый пост
-        currentPosts.push({ author: currentAdmin, text: text, time: timeString });
-
-        // 3. Сохраняем обновленный список в облако методом POST
-        const response = await fetch(URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(currentPosts)
-        });
-
-        if (response.ok) {
-            textInput.value = '';
-            loadPosts();
-        } else {
-            alert('Ошибка при публикации. База данных npoint отклонила запрос.');
+            chat.history.forEach(msg => {
+                const bubble = document.createElement('div');
+                bubble.className = `msg-bubble ${msg.isOut ? 'msg-out' : 'msg-in'}`;
+                bubble.innerHTML = `${msg.text} <span class="msg-time">${msg.time}</span>`;
+                box.appendChild(bubble);
+            });
+            box.scrollTop = box.scrollHeight;
         }
-    }
 
-    // Первоначальный запуск
-    loadPosts();
-    // Проверка новых постов в фоне каждые 3 секунды
-    setInterval(loadPosts, 3000);
-</script>
+        async function sendMessage() {
+            const inp = document.getElementById('messageText');
+            const text = inp.value.trim();
+            if (!text || activeChatId === null) return;
 
+            const chat = chatsData.find(c => c.id === activeChatId);
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+
+            chat.history.push({ text: text, isOut: true, time: timeStr });
+            inp.value = "";
+            renderMessages();
+            initApp();
+            
+            await saveDataToCloud();
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        function toggleSettings(show) {
+            const panel = document.getElementById('settingsPanel');
+            if (show) {
+                panel.classList.add('active');
+            } else {
+                panel.classList.remove('active');
+                saveDataToCloud(); 
+            }
+        }
+
+        function updateProfileName(val) {
+            const name = val.trim() || "Yarik34051";
+            document.getElementById('profileNameDisplay').innerText = name;
+            if (!myAvatarUrl) {
+                document.getElementById('myAvatar').innerText = name.charAt(0).toUpperCase();
+            }
+        }
+
+        function uploadAvatar(event) {
+            const file = event.target.files;
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                myAvatarUrl = e.target.result;
+                const av = document.getElementById('myAvatar');
+                av.style.backgroundImage = `url('${myAvatarUrl}')`;
+                av.innerText = "";
+                await saveDataToCloud();
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function toggleTheme(isDark) {
+            if (isDark) document.body.className = "dark-mode";
+            else document.body.className = "";
+        }
+
+        function changeChatBg(color) {
+            document.getElementById('chatWindow').style.backgroundColor = color;
+        }
+    </script>
 </body>
 </html>
+
